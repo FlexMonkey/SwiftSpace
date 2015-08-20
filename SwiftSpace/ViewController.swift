@@ -2,7 +2,7 @@
 //  ViewController.swift
 //  SwiftSpace
 //
-//  Created by SIMON_NON_ADMIN on 20/08/2015.
+//  Created by Simon Gladman on 20/08/2015.
 //  Copyright © 2015 Simon Gladman. All rights reserved.
 //
 
@@ -13,16 +13,21 @@ import CoreMotion
 class ViewController: UIViewController
 {
     
+    
+    let buttonBar = UIToolbar()
+    
     let cameraDistance: Float = 2
     
     let sceneKitView = SCNView()
     let cameraNode = SCNNode()
-    let omniLightNode = SCNNode()
     
     var initialAttitude: (roll: Double, pitch:Double)?
     let motionManager = CMMotionManager()
     
     let currentDrawingLayerSize = 512
+    
+    var currentDrawingNode: SCNNode?
+    var currentDrawingLayer: CAShapeLayer?
     
     override func viewDidLoad()
     {
@@ -33,7 +38,13 @@ class ViewController: UIViewController
         
         super.viewDidLoad()
         
+        let title = UIBarButtonItem(title: "flexmonkey.co.uk", style: UIBarButtonItemStyle.Plain, target: nil, action: nil)
+        let spacer = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.FlexibleSpace, target: nil, action: nil)
+        let clearButton = UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.Trash, target: self, action: "clear")
+        buttonBar.items = [title, spacer, clearButton]
+        
         view.addSubview(sceneKitView)
+        view.addSubview(buttonBar)
         
         sceneKitView.backgroundColor = UIColor.darkGrayColor()
         
@@ -79,16 +90,10 @@ class ViewController: UIViewController
                 
                 self.cameraNode.eulerAngles.y = Float(self.initialAttitude!.roll - deviceMotionData.attitude.roll)
                 self.cameraNode.eulerAngles.x = Float(self.initialAttitude!.pitch - deviceMotionData.attitude.pitch)
-                
-                self.omniLightNode.eulerAngles.y = Float(self.initialAttitude!.roll - deviceMotionData.attitude.roll)
-                self.omniLightNode.eulerAngles.x = Float(self.initialAttitude!.pitch - deviceMotionData.attitude.pitch)
             }
         }
         
     }
-    
-    var currentDrawingNode: SCNNode?
-    var currentDrawingLayer: CAShapeLayer?
     
     override func touchesBegan(touches: Set<UITouch>, withEvent event: UIEvent?)
     {
@@ -116,7 +121,7 @@ class ViewController: UIViewController
             let material = SCNMaterial()
 
             material.diffuse.contents = currentDrawingLayer
-            material.lightingModelName = "SCNLightingModelConstant"
+            material.lightingModelName = SCNLightingModelConstant
             
             currentDrawingNode.geometry?.materials = [material]
         }
@@ -131,7 +136,6 @@ class ViewController: UIViewController
         if let hitTestResult:SCNHitTestResult = sceneKitView.hitTest(locationInView!, options: nil).filter( { $0.node == currentDrawingNode }).first,
             currentDrawingLayer = currentDrawingLayer
         {
-            
             if currentDrawingLayer.path == nil
             {
                 let newX = CGFloat((hitTestResult.localCoordinates.x + 0.5) * Float(currentDrawingLayerSize))
@@ -159,6 +163,14 @@ class ViewController: UIViewController
         currentDrawingNode = nil
     }
     
+    func clear()
+    {
+        scene.rootNode.childNodes.filter( {$0.geometry != nil} ).forEach
+        {
+            $0.removeFromParentNode()
+        }
+    }
+    
     var scene: SCNScene
     {
         return sceneKitView.scene!
@@ -169,8 +181,11 @@ class ViewController: UIViewController
         super.viewDidLayoutSubviews()
         
         let topMargin = topLayoutGuide.length
+        let toolbarHeight = buttonBar.intrinsicContentSize().height
         
-        sceneKitView.frame = CGRect(x: 0, y: topMargin, width: view.frame.width, height: view.frame.height - topMargin)
+        sceneKitView.frame = CGRect(x: 0, y: topMargin, width: view.frame.width, height: view.frame.height - topMargin - toolbarHeight)
+        
+        buttonBar.frame = CGRect(x: 0, y: view.frame.height - toolbarHeight, width: view.frame.width, height: toolbarHeight)
     }
     
     override func supportedInterfaceOrientations() -> UIInterfaceOrientationMask
