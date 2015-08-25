@@ -15,7 +15,7 @@ Easy! Let's break it down:
 
 I wanted the camera at to always point at and rotate around the centre of the world while being slightly offset from it. The two things to help this are the camera's pivot property and using a "look at constraint". First off, I create a node to represent the centre of the world and the camera itself:
 
-```
+```swift
     let centreNode = SCNNode()
     centreNode.position = SCNVector3(x: 0, y: 0, z: 0)
     scene.rootNode.addChildNode(centreNode)
@@ -28,14 +28,14 @@ I wanted the camera at to always point at and rotate around the centre of the wo
 
 Next, an SCNLookAtConstraint means that however I translate the camera, it will always point at the centre:
 
-```
+```swift
     let constraint = SCNLookAtConstraint(target: centreNode)
     cameraNode.constraints = [constraint]
 ```
 
 ...and finally, setting the camera's pivot will reposition it but have it rotate around the centre of the world: 
 
-```
+```swift
     cameraNode.pivot = SCNMatrix4MakeTranslation(0, 0, -cameraDistance)
 ```
 
@@ -47,7 +47,7 @@ Next up is handling the iPhone's motion to rotate the camera. Remembering that t
 
 The first step is to create an instance of CMMotionManager and ensure it's available and working (so this code won't work on the simulator):
 
-```
+```swift
     let motionManager = CMMotionManager()
         
     guard motionManager.gyroAvailable else
@@ -59,7 +59,7 @@ The first step is to create an instance of CMMotionManager and ensure it's avail
 
 Next up, I start the motion manager with a little block of code that's invoked with each update. I use a tuple to store the initial attitude of the iPhone and simple use the difference between that initial value and the current attitude to set the camera's Euler angles:
 
-```
+```swift
     let queue = NSOperationQueue.mainQueue
     
     motionManager.deviceMotionUpdateInterval = 1 / 30
@@ -87,7 +87,7 @@ Next up, I start the motion manager with a little block of code that's invoked w
 
 Since I know the angles of my camera, it's pretty simple to align the target geometry for drawing on the touchesBegan() method - it just shares the same attitude:
 
-```
+```swift
     currentDrawingNode = SCNNode(geometry: SCNBox(width: 1, height: 1, length: 0, chamferRadius: 0))
 
     currentDrawingNode.eulerAngles.x = self.cameraNode.eulerAngles.x
@@ -96,7 +96,7 @@ Since I know the angles of my camera, it's pretty simple to align the target geo
 
 At the same time, I create a new CAShapeLayer that will contain a stroked path that follows the user's finger:
 
-```
+```swift
     currentDrawingLayer = CAShapeLayer()
 
     let material = SCNMaterial()
@@ -112,7 +112,7 @@ On touchesMoved(), I need to convert the location in the main view to the locati
 
 There are a few steps to do this, taking the locationInView() of the first item in the touches set, I pass it into hitTest()  on my SceneKit scene. This returns an array of SCNHitTestResults for all the geometries underneath the touch which I filter for the current geometry and then simply rescale the result's localCoordinates to find the coordinates on the current CAShapeLayer:
 
-```
+```swift
     let locationInView = touches.first?.locationInView(view)
 
     if let hitTestResult:SCNHitTestResult = sceneKitView.hitTest(locationInView!, options: nil).filter( { $0.node == currentDrawingNode }).first,
