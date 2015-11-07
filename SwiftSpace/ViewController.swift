@@ -29,6 +29,9 @@ class ViewController: UIViewController
     var currentDrawingNode: SCNNode?
     var currentDrawingLayer: CAShapeLayer?
     
+    let hermitePath = UIBezierPath()
+    var interpolationPoints = [CGPoint]()
+    
     override func viewDidLoad()
     {
         guard motionManager.gyroAvailable else
@@ -117,9 +120,9 @@ class ViewController: UIViewController
             currentDrawingLayer.lineJoin = kCALineJoinRound
             currentDrawingLayer.lineCap = kCALineCapRound
             currentDrawingLayer.frame = CGRect(x: 0, y: 0, width: currentDrawingLayerSize, height: currentDrawingLayerSize)
-
+            
             let material = SCNMaterial()
-
+            
             material.diffuse.contents = currentDrawingLayer
             material.lightingModelName = SCNLightingModelConstant
             
@@ -144,14 +147,22 @@ class ViewController: UIViewController
                 currentDrawingLayer.path = UIBezierPath(rect: CGRect(x: newX, y: newY, width: 0, height: 0)).CGPath
             }
             
-            let drawPath = UIBezierPath(CGPath: currentDrawingLayer.path!)
- 
             let newX = CGFloat((hitTestResult.localCoordinates.x + 0.5) * Float(currentDrawingLayerSize))
             let newY = CGFloat((hitTestResult.localCoordinates.y + 0.5) * Float(currentDrawingLayerSize))
             
-            drawPath.addLineToPoint(CGPoint(x: newX, y: newY))
+            if interpolationPoints.count == 0
+            {
+                interpolationPoints = [CGPoint(x: newX, y: newY)]
+            }
             
-            currentDrawingLayer.path = drawPath.CGPath
+            interpolationPoints.append(CGPoint(x: newX, y: newY))
+            
+            hermitePath.removeAllPoints()
+            hermitePath.interpolatePointsWithHermite(interpolationPoints)
+            
+            currentDrawingLayer.path = hermitePath.CGPath
+            
+            
         }
     }
     
@@ -161,6 +172,9 @@ class ViewController: UIViewController
         
         currentDrawingLayer = nil
         currentDrawingNode = nil
+        
+        hermitePath.removeAllPoints()
+        interpolationPoints.removeAll()
     }
     
     func clear()
