@@ -143,33 +143,26 @@ class ViewController: UIViewController
             {
                 let newX = CGFloat((hitTestResult.localCoordinates.x + 0.5) * Float(currentDrawingLayerSize))
                 let newY = CGFloat((hitTestResult.localCoordinates.y + 0.5) * Float(currentDrawingLayerSize))
-                
-                currentDrawingLayer.path = UIBezierPath(rect: CGRect(x: newX, y: newY, width: 0, height: 0)).CGPath
+        
+                interpolationPoints = [CGPoint(x: newX, y: newY)]
             }
             
             let newX = CGFloat((hitTestResult.localCoordinates.x + 0.5) * Float(currentDrawingLayerSize))
             let newY = CGFloat((hitTestResult.localCoordinates.y + 0.5) * Float(currentDrawingLayerSize))
-            
-            if interpolationPoints.count == 0
-            {
-                interpolationPoints = [CGPoint(x: newX, y: newY)]
-            }
-            
+   
             interpolationPoints.append(CGPoint(x: newX, y: newY))
             
             hermitePath.removeAllPoints()
             hermitePath.interpolatePointsWithHermite(interpolationPoints)
             
             currentDrawingLayer.path = hermitePath.CGPath
-            
-            
         }
     }
     
     override func touchesEnded(touches: Set<UITouch>, withEvent event: UIEvent?)
     {
         super.touchesEnded(touches, withEvent: event)
-        
+
         currentDrawingLayer = nil
         currentDrawingNode = nil
         
