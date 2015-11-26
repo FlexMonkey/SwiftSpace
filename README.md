@@ -1,4 +1,7 @@
 # SwiftSpace
+
+[![BuddyBuild](https://dashboard.buddybuild.com/api/statusImage?appID=565760eb28898101003ae8b3&branch=master&build=latest)](https://dashboard.buddybuild.com/apps/565760eb28898101003ae8b3/build/latest)
+
 Gyroscope Driven Drawing in 3D Space
  
 Companion project to: http://flexmonkey.blogspot.co.uk/2015/08/coremotion-controlled-3d-sketching-on.html
