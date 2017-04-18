@@ -83,7 +83,7 @@ Next up, I start the motion manager with a little block of code that's invoked w
     }
 ```
 
-##Drawing in 3D
+## Drawing in 3D
 
 Since I know the angles of my camera, it's pretty simple to align the target geometry for drawing on the touchesBegan() method - it just shares the same attitude:
 
